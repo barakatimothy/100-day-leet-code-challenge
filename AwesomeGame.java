@@ -1,60 +1,89 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Scanner;
 
-public class AwesomeGame {
+public class AwesomeGame{
+    // List of apostles' names
+    private static final ArrayList<String> apostles = new ArrayList<>(Arrays.asList(
+        "Peter", "Andrew", "James", "John", "Philip",
+        "Bartholomew", "Thomas", "Matthew",
+        "James (son of Alphaeus)", "Thaddaeus",
+        "Simon (the Zealot)", "Judas Iscariot"
+    ));
+    private static final ArrayList<String> guessedCorrectly = new ArrayList<>();
+    private static int score = 0;
 
     public static void main(String[] args) {
-        // List of apostles' names
-        ArrayList<String> apostles = new ArrayList<>(Arrays.asList(
-            "Peter", "Andrew", "James", "John", "Philip", 
-            "Bartholomew", "Thomas", "Matthew", 
-            "James (son of Alphaeus)", "Thaddaeus", 
-            "Simon (the Zealot)", "Judas Iscariot"
-        ));
+        // Create the main frame
+        JFrame frame = new JFrame("Apostles Guessing Game");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(400, 300);
 
-        Scanner scanner = new Scanner(System.in);
-        ArrayList<String> guessedCorrectly = new ArrayList<>();
-        int score = 0;
+        // Create a panel for layout
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout(10, 10));
 
-        System.out.println("Welcome to the Apostles Game!");
-        System.out.println("Try to name the 12 apostles. Type 'quit' to exit.");
-        System.out.println();
+        // Header Label
+        JLabel header = new JLabel("Guess the 12 Apostles", JLabel.CENTER);
+        header.setFont(new Font("Arial", Font.BOLD, 18));
+        panel.add(header, BorderLayout.NORTH);
 
-        while (true) {
-            System.out.print("Enter a name: ");
-            String input = scanner.nextLine().trim();
+        // Text field for input
+        JTextField inputField = new JTextField();
+        inputField.setFont(new Font("Arial", Font.PLAIN, 16));
+        panel.add(inputField, BorderLayout.CENTER);
 
-            if (input.equalsIgnoreCase("quit")) {
-                System.out.println("Exiting the game...");
-                break;
-            }
+        // Button to submit
+        JButton submitButton = new JButton("Submit");
+        submitButton.setFont(new Font("Arial", Font.BOLD, 14));
+        panel.add(submitButton, BorderLayout.EAST);
 
-            if (apostles.contains(input)) {
-                if (guessedCorrectly.contains(input)) {
-                    System.out.println("You've already guessed that name. Try another!");
-                } else {
-                    guessedCorrectly.add(input);
-                    score++;
-                    System.out.println("Correct! You've guessed " + score + " out of 12.");
+        // Text area for feedback
+        JTextArea feedbackArea = new JTextArea();
+        feedbackArea.setEditable(false);
+        feedbackArea.setFont(new Font("Arial", Font.PLAIN, 14));
+        feedbackArea.setLineWrap(true);
+        feedbackArea.setWrapStyleWord(true);
+        JScrollPane scrollPane = new JScrollPane(feedbackArea);
+        panel.add(scrollPane, BorderLayout.SOUTH);
+
+        frame.add(panel);
+        frame.setVisible(true);
+
+        // ActionListener for the submit button
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String input = inputField.getText().trim();
+                if (input.isEmpty()) {
+                    feedbackArea.append("Please enter a name.\n");
+                    return;
                 }
-            } else {
-                System.out.println("Incorrect. Try again!");
+
+                if (apostles.contains(input)) {
+                    if (guessedCorrectly.contains(input)) {
+                        feedbackArea.append("You already guessed '" + input + "'. Try another.\n");
+                    } else {
+                        guessedCorrectly.add(input);
+                        score++;
+                        feedbackArea.append("Correct! '" + input + "' is an apostle.\n");
+                    }
+                } else {
+                    feedbackArea.append("Incorrect! '" + input + "' is not an apostle.\n");
+                }
+
+                inputField.setText("");
+
+                // Check if the user has guessed all apostles
+                if (score == apostles.size()) {
+                    feedbackArea.append("Congratulations! You've guessed all apostles!\n");
+                    submitButton.setEnabled(false);
+                    inputField.setEditable(false);
+                }
             }
-
-            if (score == 12) {
-                System.out.println("Congratulations! You've guessed all the apostles correctly!");
-                break;
-            }
-        }
-
-        System.out.println("\nGame Over!");
-        System.out.println("You guessed " + score + " apostles correctly.");
-        System.out.println("Names you guessed: " + guessedCorrectly);
-        System.out.println("Remaining apostles: ");
-        apostles.removeAll(guessedCorrectly);
-        System.out.println(apostles);
-
-        scanner.close();
+        });
     }
 }
